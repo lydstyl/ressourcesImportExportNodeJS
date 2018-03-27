@@ -5,18 +5,11 @@ const fs = require('fs');
 const path = require("path");
 const csv = require('fast-csv');
 
-/*var langCheck = ['fr_FR', 'nl_NL','de_DE', 'en_HK', 'en_US', 'es_ES', 'en_GB'] // on veut ces langues
-var ressourceFolder = "C:\\Users\\actoure\\workspace\\ba-sh-salesforce-site-ecomm\\cartridges\\app_bash\\cartridge\\templates\\resources";
-var csvFolder = "C:\\Users\\actoure";
-var csvName = "proprietes.csv";
-var theDelimiter = ';'*/
-
-var langCheck = ['fr_FR', 'nl_NL','de_DE', 'en_HK', 'en_US', 'es_ES', 'en_GB'] // on veut ces langues
+var langCheck = ['fr_FR', '', 'de_DE', 'en', 'en_AE'] // on veut ces langues
 var ressourceFolder = "C:\\workspaceBabyliss\\conair-uk\\cartridges\\app_babyliss_fr\\cartridge\\templates\\resources";
 var csvFolder = "C:\\Script\\ressource";
 var csvName = "ressource.csv";
 var theDelimiter = ';'
-
 
 function loadProperties(file){
     var sep = "=";
@@ -37,7 +30,6 @@ function loadProperties(file){
     return props;
 }
 
-
 function getAllProperties(){
     var listdir = fs.readdirSync(ressourceFolder);
     for (lang in langCheck){
@@ -55,43 +47,6 @@ function getAllProperties(){
     }
 }
 
-
-
-
-//getAllProperties();
-
-
-//glob("*//*.properties", {cwd : ressourceFolder.replace('\\', '/'), absolute: true} , function (er, files) {
-/*    if(er) { throw er }
-    const map = {};
-    let read = 0;
-
-    files.forEach(function(file) {
-        properties.parse(file, { path: true }, function (error, obj){
-            if (error) return console.log(error);
-            map[file] = obj;
-            console.log(`read=${read} ; files.length=${files.length}`);
-            read++;
-            if(read == files.length) {
-                handleResult(map);
-            }
-        });
-
-    });*/
-
-
-/*});
-
-function handleResult(propertiesMap) {
-    const output = fs.createWriteStream('output.log');
-    output.write(JSON.stringify(propertiesMap, null, 2));
-    output.end();
-}
-
-*/
-//console.log(getAllProperties());
-
-
 glob("**/*.properties", {cwd : ressourceFolder.replace('\\', '/'), absolute: true}, function (er, files) {
     if(er) {throw er};
     var map = {};
@@ -108,12 +63,10 @@ glob("**/*.properties", {cwd : ressourceFolder.replace('\\', '/'), absolute: tru
     });
 });
 
-
 function getLocale(file){
     file = file.split('.');
     return file[0].substr(-5);
 }
-
 
 function getFileName(file){
     file = file.split('/');
@@ -121,7 +74,6 @@ function getFileName(file){
     file = file.split('_');
     return file[0];
 }
-
 
 function getKeys(map){
     var keylist = [];
@@ -137,7 +89,6 @@ function getKeys(map){
     }     
     return keylist;
 }
-
 
 function csvLines(map, keylist){
     var csvLines = [];
@@ -166,7 +117,6 @@ function csvLines(map, keylist){
     return csvLines;
 }
 
-
 function filter(map, files){
     var obj = {};
     for(lang in langCheck){
@@ -182,7 +132,6 @@ function filter(map, files){
     return obj;
 }
 
-
 function handleResult(propertiesMap, files) {
     const newMap =  filter(propertiesMap, files);
     const keylist = getKeys(propertiesMap);
@@ -193,39 +142,24 @@ function handleResult(propertiesMap, files) {
      *      [path, key, ... trads>]
      * ]
      */
-
     const writeStream = fs.createWriteStream(csvFolder + '\\' + csvName);
 
-const csvMapping = {
-    path : 'FileName',
-    key : 'Properties',
-}
+    const csvMapping = {
+        key : 'Key',
+    }
 
-langCheck.forEach(e => csvMapping[e] = e);
-
+    langCheck.forEach(e => csvMapping[e] = e);
     const writer = stringify({objectMode: true, columns: csvMapping, header: true, delimiter: ';'});
     writer.pipe(writeStream);
-
      data.forEach(function(e) {
-
-        //console.log(e);
-
+        e[0] = e[0].replace('.properties', '');
         const csvObject = {
-            path : e[0],
-            key : e[1]
+            key : '//ressource/' + e[0] + '/' + e[1]
         }
-
         for(let i=2; i<e.length; i++) {
             csvObject[langCheck[i-2]] = e[i];
         }
-
-        //console.log(csvObject);
-
         writer.write(csvObject);
-
      });
-
      writer.end();
-    //csv.write(data, {header:true, delimiter:';'}).pipe(output);
 }
-
