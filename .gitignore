@@ -1,2 +1,6 @@
-exp/node_module
-imp/node_module
+exp/node_modules
+imp/node_modules
+node_modules
+exp/node_modules/*
+imp/node_modules/*
+imp/dossier/*
